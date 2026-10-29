@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kashish & Ruchi - Wedding Invitation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --royal-blue: #1A2B4C;
+            --royal-blue-dark: #0F192E;
+            --gold: #D4AF37;
+            --gold-light: #F4E8C1;
+            --off-white: #FBFBFA;
+            --cream: #F5F3ED;
+            --text-dark: #2C3E50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--royal-blue-dark);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background-color: var(--off-white);
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @media (min-width: 481px) {
+            .container {
+                min-height: 90vh;
+                max-height: 95vh;
+                border-radius: 16px;
+                overflow-y: auto;
+            }
+        }
+
+        /* --- ENVELOPE LANDING PAGE --- */
+        #envelope-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--off-white) 0%, var(--cream) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #envelope-screen.fade-out {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+
+        .envelope-wrapper {
+            width: 320px;
+            height: 220px;
+            background: #fff;
+            border: 2px solid var(--royal-blue);
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(26, 43, 76, 0.2);
+            border-radius: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 120px solid var(--royal-blue);
+            transform-origin: top;
+            transition: transform 0.6s ease 0.2s;
+            z-index: 10;
+        }
+
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 95px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #D4AF37 0%, #AA7C11 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px dashed #FFF;
+            z-index: 15;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper.open .wax-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.5);
+        }
+
+        .envelope-content-preview {
+            position: absolute.hidden;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .family-badge {
+            margin-top: 25px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--royal-blue);
+            font-weight: 600;
+        }
+
+        .tap-instruction {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--royal-blue);
+            letter-spacing: 1px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* --- MAIN INVITATION LEAFLET --- */
+        #main-content {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background: var(--off-white);
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header / Hero */
+        .hero-section {
+            background-color: var(--royal-blue);
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            border-bottom: 4px solid var(--gold);
+        }
+
+        .hero-section h3 {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+        }
+
+        .hero-section h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .hero-section .names-sub {
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: var(--gold-light);
+        }
+
+        /* Music Toggle */
+        .music-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid var(--gold);
+            color: #fff;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .music-toggle:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            color: var(--royal-blue);
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        /* Countdown Timer */
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .countdown-box {
+            background: var(--royal-blue);
+            color: #fff;
+            padding: 12px 10px;
+            border-radius: 8px;
+            min-width: 65px;
+            border: 1px solid var(--gold);
+        }
+
+        .countdown-box span {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+
+        .countdown-box label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Scratch Card Component */
+        .scratch-card-wrapper {
+            background: #fff;
+            border: 1px solid #E2D9C5;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(26,43,76,0.08);
+            position: relative;
+        }
+
+        .event-heading {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            color: var(--royal-blue);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .event-sub {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .scratch-container {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            background: #F9F8F5;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--gold);
+        }
+
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+            touch-action: none;
+        }
+
+        .scratch-content {
+            padding: 10px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .scratch-content p {
+            font-size: 13px;
+            color: var(--royal-blue);
+            margin: 4px 0;
+            font-weight: 500;
+        }
+
+        .scratch-content strong {
+            color: #111;
+        }
+
+        .global-scratch-btn {
+            background: var(--royal-blue);
+            color: var(--gold-light);
+            border: 1px solid var(--gold);
+            padding: 8px 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .global-scratch-btn:hover {
+            background: var(--gold);
+            color: var(--royal-blue);
+        }
+
+        /* Calendar Button */
+        .cal-btn {
+            display: inline-block;
+            margin-top: 12px;
+            background: transparent;
+            color: var(--royal-blue);
+            border: 1px solid var(--royal-blue);
+            padding: 6px 14px;
+            font-size: 11px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .cal-btn:hover {
+            background: var(--royal-blue);
+            color: #fff;
+        }
+
+        /* RSVP Section */
+        .rsvp-section {
+            background: var(--cream);
+            padding: 30px 20px;
+            border-top: 1px solid #E2D9C5;
+            text-align: center;
+        }
+
+        .rsvp-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .rsvp-form input, .rsvp-form select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+        }
+
+        .rsvp-form button {
+            background: var(--royal-blue);
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: background 0.3s;
+        }
+
+        .rsvp-form button:hover {
+            background: var(--gold);
+            color: var(--royal-blue);
+        }
+
+        .footer-note {
+            font-size: 11px;
+            color: #888;
+            margin-top: 25px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- ENVELOPE LANDING PAGE -->
+        <div id="envelope-screen" onclick="openEnvelope()">
+            <div style="margin-bottom: 25px;">
+                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--royal-blue); letter-spacing: 2px;">Wedding Invitation</h3>
+                <p class="family-badge">Exclusively for the Parikh Family</p>
+            </div>
+
+            <div class="envelope-wrapper" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="wax-seal">K&R</div>
+                <div style="position: absolute; bottom: 30px; width: 100%; text-align: center;">
+                    <p style="font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--royal-blue); font-weight: bold;">Kashish & Ruchi</p>
+                </div>
+            </div>
+
+            <p class="tap-instruction">Tap envelope to open invitation ✨</p>
+        </div>
+
+        <!-- MAIN LEAFLET CONTENT -->
+        <div id="main-content">
+            
+            <!-- Hero Header -->
+            <div class="hero-section">
+                <button class="music-toggle" onclick="toggleMusic()" title="Play Music">🎵</button>
+                <h3>The Wedding Celebration of</h3>
+                <h1>Kashish & Ruchi</h1>
+                <p class="names-sub">With the blessings of the Parikh Family</p>
+            </div>
+
+            <!-- Countdown Section -->
+            <div class="section" style="padding-bottom: 10px;">
+                <h2 class="section-title">Counting Down To Forever</h2>
+                <div class="countdown-container">
+                    <div class="countdown-box">
+                        <span id="days">00</span>
+                        <label>Days</label>
+                    </div>
+                    <div class="countdown-box">
+                        <span id="hours">00</span>
+                        <label>Hours</label>
+                    </div>
+                    <div class="countdown-box">
+                        <span id="mins">00</span>
+                        <label>Mins</label>
+                    </div>
+                    <div class="countdown-box">
+                        <span id="secs">00</span>
+                        <label>Secs</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events & Scratch Cards Section -->
+            <div class="section" style="padding-top: 10px;">
+                <h2 class="section-title">Scratch to Reveal Details</h2>
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Rub your finger or mouse over the cards below!</p>
+
+                <!-- Event 1: Wedding -->
+                <div class="scratch-card-wrapper">
+                    <div class="event-heading">💍 Wedding Ceremony</div>
+                    <div class="event-sub">16th February 2027</div>
+                    
+                    <div class="scratch-container">
+                        <div class="scratch-content">
+                            <p>📅 <strong>Date:</strong> 16th Feb 2027</p>
+                            <p>📍 <strong>Venue:</strong> Thakkars, Chowpatty</p>
+                            <p>⏰ <strong>Time:</strong> Baarat 3pm | Hasta Milap 5pm</p>
+                        </div>
+                        <canvas class="scratch-canvas" id="scratch1"></canvas>
+                    </div>
+                    <button class="global-scratch-btn" onclick="revealCard(1)">Reveal All For Wedding</button>
+                    <br>
+                    <a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Kashish+%26+Ruchi+Wedding&dates=20270216T093000Z/20270216T150000Z&details=Wedding+at+Thakkars,+Chowpatty&location=Thakkars,+Chowpatty,+Mumbai" target="_blank">📅 Add to Calendar</a>
+                </div>
+
+                <!-- Event 2: Cocktail -->
+                <div class="scratch-card-wrapper">
+                    <div class="event-heading">🍸 Cocktail Party</div>
+                    <div class="event-sub">13th February 2027</div>
+                    
+                    <div class="scratch-container">
+                        <div class="scratch-content">
+                            <p>📅 <strong>Date:</strong> 13th Feb 2027</p>
+                            <p>📍 <strong>Venue:</strong> Imara, Lower Parel</p>
+                            <p>⏰ <strong>Time:</strong> 7:00 PM Onwards</p>
+                        </div>
+                        <canvas class="scratch-canvas" id="scratch2"></canvas>
+                    </div>
+                    <button class="global-scratch-btn" onclick="revealCard(2)">Reveal All For Cocktail</button>
+                    <br>
+                    <a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Kashish+%26+Ruchi+Cocktail&dates=20270213T133000Z/20270213T180000Z&details=Cocktail+at+Imara,+Lower+Parel&location=Imara,+Lower+Parel,+Mumbai" target="_blank">📅 Add to Calendar</a>
+                </div>
+            </div>
+
+            <!-- RSVP Section -->
+            <div class="rsvp-section">
+                <h2 class="section-title">RSVP</h2>
+                <p style="font-size: 13px; color: #555; margin-bottom: 20px;">Please confirm your gracious presence</p>
+                
+                <form class="rsvp-form" id="rsvpForm" onsubmit="handleRSVP(event)">
+                    <input type="text" id="guestName" placeholder="Full Name (e.g. Parikh Family)" required>
+                    <select id="attendance" required>
+                        <option value="" disabled selected>Will you be attending?</option>
+                        <option value="Joyfully Attending">Joyfully Attending ✨</option>
+                        <option value="Regretfully Absent">Regretfully Absent 💛</option>
+                    </select>
+                    <input type="text" id="guestCount" placeholder="Number of Guests attending">
+                    <button type="submit">Send RSVP</button>
+                </form>
+                
+                <p class="footer-note">KASHISH & RUCHI • 2027</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Background Audio Element -->
+    <audio id="bgMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-romantic-wedding-418.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Envelope Opening Animation
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            const screen = document.getElementById('envelope-screen');
+            const mainContent = document.getElementById('main-content');
+
+            envelope.classList.add('open');
+
+            setTimeout(() => {
+                screen.classList.add('fade-out');
+                mainContent.style.display = 'flex';
+                initScratchCards();
+                // Play music on interaction if possible
+                try {
+                    document.getElementById('bgMusic').play();
+                } catch(e) {}
+            }, 700);
+        }
+
+        // Music Toggle
+        let isPlaying = false;
+        function toggleMusic() {
+            const audio = document.getElementById('bgMusic');
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+        }
+
+        // Countdown Timer to Feb 16, 2027 15:00:00
+        const weddingDate = new Date('February 16, 2027 15:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = weddingDate - now;
+
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('mins').innerText = String(mins).padStart(2, '0');
+                document.getElementById('secs').innerText = String(secs).padStart(2, '0');
+            }
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Scratch Card Setup
+        function initScratchCard(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas resolution
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+
+            // Draw scratch layer
+            ctx.fillStyle = '#C5A880';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add texture text on scratch layer
+            ctx.font = 'bold 14px Montserrat, sans-serif';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ Scratch Here to Reveal ✨', canvas.width / 2, canvas.height / 2 + 5);
+
+            let isDrawing = false;
+
+            function scratch(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 22, 0, Math.PI * 2, false);
+                ctx.fill();
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(e); });
+            window.addEventListener('mouseup', () => { isDrawing = false; });
+
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('touchmove', (e) => { if (isDrawing) scratch(e); });
+            window.addEventListener('touchend', () => { isDrawing = false; });
+        }
+
+        function initScratchCards() {
+            initScratchCard('scratch1');
+            initScratchCard('scratch2');
+        }
+
+        function revealCard(id) {
+            const canvas = document.getElementById('scratch' + id);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // RSVP Handler & Confetti
+        function handleRSVP(event) {
+            event.preventDefault();
+            const name = document.getElementById('guestName').value;
+            const status = document.getElementById('attendance').value;
+            
+            localStorage.setItem('k_r_rsvp_' + name, status);
+
+            // Trigger confetti
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            alert(`Thank you, ${name}! Your response ("${status}") has been recorded.`);
+            document.getElementById('rsvpForm').reset();
+        }
+    </script>
+</body>
+</html>
